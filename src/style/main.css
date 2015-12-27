@@ -1,0 +1,40 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  border: 1px solid black;
+}
+
+.note__ctrl,
+.note__edit {
+  box-sizing: border-box;
+  display: inline-block;
+}
+
+.note__ctrl {
+  width: 30%;
+}
+
+.note__edit {
+  width: 70%;
+}
+
+.ctrlaction__views {
+  list-style-type: none;
+  padding: 0;
+}
+
+.ctrlactionview__notes,
+.ctrlactionview__tags {
+  box-sizing: border-box;
+  display: inline-block;
+  width: 50%;
+}
+
+.ctrlactionview__notes--active,
+.ctrlactionview__tags--active {
+  background-color: #ffcc33;
+}

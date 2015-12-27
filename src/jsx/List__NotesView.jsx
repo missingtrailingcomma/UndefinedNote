@@ -4,7 +4,11 @@ export default class List__NotesView extends React.Component {
   render() {
     return (
       <div className="list__notesview">
-        <h1>notes</h1>
+        {this.props.noteEntries.map((notes, i)=>{
+          return (
+            <div key={i}>{notes.title}</div>
+          );
+        }, this)}
       </div>
     );
   }

@@ -5,14 +5,14 @@ import React from 'react';
 export default class Ctrl__List extends React.Component {
   render() {
     switch (this.props.viewType) {
-      case 'notesView':
+      case 'notes':
       return (
-        <List__NotesView />
+        <List__NotesView noteEntries={this.props.noteEntries}/>
       );
       break;
-      case 'tagsView':
+      case 'tags':
       return (
-        <List__TagsView />
+        <List__TagsView noteEntries={this.props.noteEntries}/>
       );
       break;
       default:
