@@ -1,21 +1,31 @@
 import React from 'react';
 
 export default class List__TagsView extends React.Component {
+  handleNoteClick(key) {
+    this.props.handleSelectNote(key);
+  }
+
   render() {
-    const notesTags = this.props.noteEntries.map((notes, i)=>{
-      return notes.tags;
+    const notesTags = Object.keys(this.props.noteEntries).map((notes, i)=>{
+      return this.props.noteEntries[notes].tags;
     });
 
     let tags = {};
-    notesTags.forEach((noteTags, i)=>{
-      noteTags.forEach((tag, j)=>{
+    Object.keys(this.props.noteEntries).forEach((note, i)=>{
+      let noteTags = this.props.noteEntries[note].tags;
+      noteTags.forEach((tag, i) => {
         if (tags[tag] === undefined) {
           tags[tag] = [];
         }
-        tags[tag].push(this.props.noteEntries[i].title);
-      })
+        tags[tag].push(
+          {
+            title: this.props.noteEntries[note].title,
+            id: note,
+          }
+        );
+      });
     });
-    
+
     return (
       <div className="list__tagsview">
         {Object.keys(tags).map((tagGrp)=>{
@@ -23,9 +33,9 @@ export default class List__TagsView extends React.Component {
             <div key={tagGrp}>
               <h2>{tagGrp}</h2>
               <ul>
-                {tags[tagGrp].map((tag, i)=>{
+                {tags[tagGrp].map((note, i)=>{
                   return (
-                    <li key={i}>{tag}</li>
+                    <li key={i} onClick={this.handleNoteClick.bind(this, note.id)}>{note.title}</li>
                   );
                 })}
               </ul>

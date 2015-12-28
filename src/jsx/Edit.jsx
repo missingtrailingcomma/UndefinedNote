@@ -5,8 +5,8 @@ import React from 'react';
 export default class Edit extends React.Component {
   render() {
     return (
-      <div className="note__edit edit">
-        <Edit__Content />
+      <div className="note__edit edit--non-void">
+        <Edit__Content selectedNote={this.props.selectedNote} handleUpdateNote={this.props.handleUpdateNote}/>
         <Edit__Tools />
       </div>
     );

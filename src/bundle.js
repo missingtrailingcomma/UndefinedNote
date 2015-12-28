@@ -18980,7 +18980,7 @@ var Ctrl = (function (_React$Component) {
         'div',
         { className: 'note__ctrl ctrl' },
         _react2.default.createElement(_Ctrl__Action2.default, { handleToggleView: this.handleToggleView.bind(this) }),
-        _react2.default.createElement(_Ctrl__List2.default, { viewType: this.state.chosenView, noteEntries: this.props.noteEntries })
+        _react2.default.createElement(_Ctrl__List2.default, { viewType: this.state.chosenView, noteEntries: this.props.noteEntries, handleSelectNote: this.props.handleSelectNote })
       );
     }
   }]);
@@ -19115,10 +19115,10 @@ var Ctrl__List = (function (_React$Component) {
     value: function render() {
       switch (this.props.viewType) {
         case 'notes':
-          return _react2.default.createElement(_List__NotesView2.default, { noteEntries: this.props.noteEntries });
+          return _react2.default.createElement(_List__NotesView2.default, { noteEntries: this.props.noteEntries, handleSelectNote: this.props.handleSelectNote });
           break;
         case 'tags':
-          return _react2.default.createElement(_List__TagsView2.default, { noteEntries: this.props.noteEntries });
+          return _react2.default.createElement(_List__TagsView2.default, { noteEntries: this.props.noteEntries, handleSelectNote: this.props.handleSelectNote });
           break;
         default:
           return _react2.default.createElement(
@@ -19178,8 +19178,8 @@ var Edit = (function (_React$Component) {
     value: function render() {
       return _react2.default.createElement(
         'div',
-        { className: 'note__edit edit' },
-        _react2.default.createElement(_Edit__Content2.default, null),
+        { className: 'note__edit edit--non-void' },
+        _react2.default.createElement(_Edit__Content2.default, { selectedNote: this.props.selectedNote, handleUpdateNote: this.props.handleUpdateNote }),
         _react2.default.createElement(_Edit__Tools2.default, null)
       );
     }
@@ -19191,7 +19191,7 @@ var Edit = (function (_React$Component) {
 exports.default = Edit;
 
 },{"./Edit__Content.jsx":162,"./Edit__Tools.jsx":163,"react":157}],162:[function(require,module,exports){
-"use strict";
+'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
@@ -19199,7 +19199,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _react = require("react");
+var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
@@ -19214,25 +19214,88 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Edit__Content = (function (_React$Component) {
   _inherits(Edit__Content, _React$Component);
 
-  function Edit__Content() {
+  function Edit__Content(props) {
     _classCallCheck(this, Edit__Content);
 
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(Edit__Content).apply(this, arguments));
+    var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Edit__Content).call(this, props));
+
+    _this2.editor = undefined;
+    _this2.tempNote = {
+      id: undefined,
+      body: undefined
+    };
+    return _this2;
   }
 
   _createClass(Edit__Content, [{
-    key: "handleNoteInput",
-    value: function handleNoteInput(e) {
-      var content = e.target.value;
+    key: 'handleMarkdownChange',
+    value: function handleMarkdownChange(md) {
+      this.tempNote.body = md;
+      this.canUpdateNote();
     }
   }, {
-    key: "render",
+    key: 'handleNoteIDChange',
+    value: function handleNoteIDChange(id) {
+      this.tempNote.id = id;
+      this.canUpdateNote();
+    }
+  }, {
+    key: 'canUpdateNote',
+    value: function canUpdateNote() {
+      if (this.tempNote.id !== undefined && this.tempNote.body !== undefined) {
+        this.props.handleUpdateNote(this.tempNote);
+      }
+    }
+  }, {
+    key: 'shouldComponentUpdate',
+    value: function shouldComponentUpdate(nextProps, nextState) {
+      if (nextProps.selectedNote && nextProps.selectedNote.id === this.tempNote.id && nextProps.selectedNote.body === this.tempNote.body) {
+        return false;
+      }
+
+      if (!this.props.selectedNote && nextProps.selectedNote || this.props.selectedNote && this.props.selectedNote.id !== nextProps.selectedNote.id) {
+        document.getElementsByClassName('editwrapper__editor')[0].focus();
+        this.editor.selectAllContents();
+        this.editor.pasteHTML(nextProps.selectedNote.body);
+      }
+      if (nextProps.selectedNote !== undefined) {
+        this.handleNoteIDChange(nextProps.selectedNote.id);
+      }
+      return true;
+    }
+  }, {
+    key: 'render',
     value: function render() {
+      var divStyle = {
+        borderWidth: '5px',
+        borderColor: '#7a0019'
+      };
+
       return _react2.default.createElement(
-        "div",
-        { className: "edit__content" },
-        _react2.default.createElement("textarea", { onChange: this.handleNoteInput })
+        'div',
+        { className: 'edit__content editwrapper', style: divStyle },
+        _react2.default.createElement('div', { className: 'editwrapper__editor' })
       );
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      var _this = this;
+      var editor = new MediumEditor('.editwrapper__editor', {
+        toolbar: {
+          allowMultiParagraphSelection: true,
+          buttons: ['bold', 'italic', 'underline', 'orderedlist', 'unorderedlist', 'anchor', 'quote']
+        },
+        placeholder: {
+          text: 'Untitled'
+        },
+        extensions: {
+          markdown: new MeMarkdown(function (md) {
+            _this.handleMarkdownChange(md);
+          })
+        }
+      });
+      this.editor = editor;
     }
   }]);
 
@@ -19277,19 +19340,18 @@ var Edit__Tools = (function (_React$Component) {
       return _react2.default.createElement(
         "div",
         { className: "edit__tools" },
-        _react2.default.createElement("input", { type: "text" }),
         _react2.default.createElement(
           "div",
           null,
-          "tags"
+          "tagsPlaceHolder"
         ),
         _react2.default.createElement(
-          "span",
+          "div",
           null,
           "Meta"
         ),
         _react2.default.createElement(
-          "span",
+          "div",
           null,
           "Read Mode"
         )
@@ -19333,18 +19395,29 @@ var List__NotesView = (function (_React$Component) {
   }
 
   _createClass(List__NotesView, [{
+    key: "handleNoteClick",
+    value: function handleNoteClick(key) {
+      this.props.handleSelectNote(key);
+    }
+  }, {
     key: "render",
     value: function render() {
+      var _this2 = this;
+
       return _react2.default.createElement(
         "div",
         { className: "list__notesview" },
-        this.props.noteEntries.map(function (notes, i) {
-          return _react2.default.createElement(
-            "div",
-            { key: i },
-            notes.title
-          );
-        }, this)
+        _react2.default.createElement(
+          "ul",
+          null,
+          Object.keys(this.props.noteEntries).map(function (note, i) {
+            return _react2.default.createElement(
+              "li",
+              { key: i, onClick: _this2.handleNoteClick.bind(_this2, note) },
+              _this2.props.noteEntries[note].title
+            );
+          }, this)
+        )
       );
     }
   }]);
@@ -19385,21 +19458,30 @@ var List__TagsView = (function (_React$Component) {
   }
 
   _createClass(List__TagsView, [{
+    key: "handleNoteClick",
+    value: function handleNoteClick(key) {
+      this.props.handleSelectNote(key);
+    }
+  }, {
     key: "render",
     value: function render() {
       var _this2 = this;
 
-      var notesTags = this.props.noteEntries.map(function (notes, i) {
-        return notes.tags;
+      var notesTags = Object.keys(this.props.noteEntries).map(function (notes, i) {
+        return _this2.props.noteEntries[notes].tags;
       });
 
       var tags = {};
-      notesTags.forEach(function (noteTags, i) {
-        noteTags.forEach(function (tag, j) {
+      Object.keys(this.props.noteEntries).forEach(function (note, i) {
+        var noteTags = _this2.props.noteEntries[note].tags;
+        noteTags.forEach(function (tag, i) {
           if (tags[tag] === undefined) {
             tags[tag] = [];
           }
-          tags[tag].push(_this2.props.noteEntries[i].title);
+          tags[tag].push({
+            title: _this2.props.noteEntries[note].title,
+            id: note
+          });
         });
       });
 
@@ -19418,11 +19500,11 @@ var List__TagsView = (function (_React$Component) {
             _react2.default.createElement(
               "ul",
               null,
-              tags[tagGrp].map(function (tag, i) {
+              tags[tagGrp].map(function (note, i) {
                 return _react2.default.createElement(
                   "li",
-                  { key: i },
-                  tag
+                  { key: i, onClick: _this2.handleNoteClick.bind(_this2, note.id) },
+                  note.title
                 );
               })
             )
@@ -19475,27 +19557,53 @@ var Note = (function (_React$Component) {
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Note).call(this, props));
 
     _this.state = {
-      noteEntries: [{
-        title: '1st entry',
-        tags: ['like', 'enjoy'],
-        body: '##content oh readlly?'
-      }, {
-        title: '2nd entry',
-        tags: ['like'],
-        body: '##fake data'
-      }]
+      noteEntries: {
+        i1: {
+          id: 'i1',
+          title: '1st entry',
+          tags: ['like', 'enjoy'],
+          body: '## 1st'
+        },
+        i2: {
+          id: 'i2',
+          title: '2nd entry',
+          tags: ['like'],
+          body: '## 2nd'
+        }
+      },
+      selectedNote: ''
     };
+    _this.handleSelectNote = _this.handleSelectNote.bind(_this);
+    _this.handleUpdateNote = _this.handleUpdateNote.bind(_this);
     return _this;
   }
 
   _createClass(Note, [{
+    key: 'handleSelectNote',
+    value: function handleSelectNote(note) {
+      this.setState({ selectedNote: note });
+    }
+  }, {
+    key: 'handleUpdateNote',
+    value: function handleUpdateNote(note) {
+      console.log(note);
+      if (note !== undefined) {
+        var id = note.id;
+        var body = note.body;
+        var noteEntries = this.state.noteEntries;
+
+        noteEntries[id].body = body;
+        this.setState({ noteEntries: noteEntries });
+      }
+    }
+  }, {
     key: 'render',
     value: function render() {
       return _react2.default.createElement(
         'main',
         { className: 'note' },
-        _react2.default.createElement(_Ctrl2.default, { noteEntries: this.state.noteEntries }),
-        _react2.default.createElement(_Edit2.default, null)
+        _react2.default.createElement(_Ctrl2.default, { noteEntries: this.state.noteEntries, handleSelectNote: this.handleSelectNote }),
+        _react2.default.createElement(_Edit2.default, { selectedNote: this.state.noteEntries[this.state.selectedNote], handleUpdateNote: this.handleUpdateNote })
       );
     }
   }]);
@@ -19617,4 +19725,4 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}]},{},[158,159,160,161,164,165,166,167]);
+},{}]},{},[158,159,160,161,162,163,164,165,166,167]);

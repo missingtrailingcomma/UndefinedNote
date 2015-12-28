@@ -7,12 +7,12 @@ export default class Ctrl__List extends React.Component {
     switch (this.props.viewType) {
       case 'notes':
       return (
-        <List__NotesView noteEntries={this.props.noteEntries}/>
+        <List__NotesView noteEntries={this.props.noteEntries} handleSelectNote={this.props.handleSelectNote}/>
       );
       break;
       case 'tags':
       return (
-        <List__TagsView noteEntries={this.props.noteEntries}/>
+        <List__TagsView noteEntries={this.props.noteEntries} handleSelectNote={this.props.handleSelectNote}/>
       );
       break;
       default:

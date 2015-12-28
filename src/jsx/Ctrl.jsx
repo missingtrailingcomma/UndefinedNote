@@ -20,7 +20,7 @@ export default class Ctrl extends React.Component {
     return (
       <div className="note__ctrl ctrl">
         <Ctrl__Action handleToggleView={this.handleToggleView.bind(this)}/>
-        <Ctrl__List viewType={this.state.chosenView} noteEntries={this.props.noteEntries}/>
+        <Ctrl__List viewType={this.state.chosenView} noteEntries={this.props.noteEntries} handleSelectNote = {this.props.handleSelectNote}/>
       </div>
     );
   }
